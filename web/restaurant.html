@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Portal – Food Delivery</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#222}
+  header{background:#457b9d;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+  header h1{font-size:1.3rem}
+  .container{max-width:1000px;margin:24px auto;padding:0 16px}
+  .panel{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:20px;margin-bottom:20px}
+  h2{font-size:1.1rem;margin-bottom:14px;color:#457b9d}
+  input,select,textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:6px;font-size:.95rem;margin-bottom:10px}
+  .btn{padding:9px 18px;border:none;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:600;transition:opacity .2s}
+  .btn:hover{opacity:.85}
+  .btn-blue{background:#457b9d;color:#fff}
+  .btn-red{background:#e63946;color:#fff}
+  .btn-green{background:#2a9d8f;color:#fff}
+  .btn-orange{background:#f4a261;color:#fff}
+  .btn-sm{padding:5px 12px;font-size:.82rem}
+  .tabs{display:flex;border-bottom:2px solid #eee;margin-bottom:20px}
+  .tab{padding:10px 22px;cursor:pointer;font-weight:600;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px}
+  .tab.active{color:#457b9d;border-bottom-color:#457b9d}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{text-align:left;padding:8px 10px;background:#f0f4f8;color:#555;font-weight:600}
+  td{padding:8px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.75rem;font-weight:600}
+  .tag-green{background:#d4edda;color:#155724}
+  .tag-red{background:#f8d7da;color:#721c24}
+  .tag-yellow{background:#fff3cd;color:#856404}
+  .tag-blue{background:#cce5ff;color:#004085}
+  .msg{padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:.9rem}
+  .msg-err{background:#f8d7da;color:#721c24}
+  .msg-ok{background:#d4edda;color:#155724}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
+  #auth-section{max-width:440px;margin:40px auto;padding:0 16px}
+  #logout-btn{background:none;border:none;color:#fff;cursor:pointer;font-size:.9rem;text-decoration:underline}
+</style>
+</head>
+<body>
+<header>
+  <h1>🍽️ Restaurant Portal</h1>
+  <div>
+    <span id="header-name" style="font-size:.9rem;margin-right:12px"></span>
+    <button id="logout-btn" onclick="logout()" style="display:none">Logout</button>
+  </div>
+</header>
+
+<!-- Auth / Restaurant selection -->
+<div id="auth-section">
+  <div class="panel">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">Select Restaurant</div>
+      <div class="tab" onclick="switchTab('register')">Register New</div>
+    </div>
+    <div id="auth-msg"></div>
+
+    <!-- Select existing -->
+    <div id="login-form">
+      <p style="font-size:.9rem;color:#666;margin-bottom:12px">Choose your restaurant to manage it.</p>
+      <select id="restaurant-select"><option value="">Loading…</option></select>
+      <button class="btn btn-blue" style="width:100%" onclick="selectRestaurant()">Enter Portal</button>
+    </div>
+
+    <!-- Register new -->
+    <div id="register-form" style="display:none">
+      <div class="grid2">
+        <input id="rg-name"    placeholder="Restaurant Name *">
+        <input id="rg-cuisine" placeholder="Cuisine Type *">
+      </div>
+      <input id="rg-address" placeholder="Address *">
+      <div class="grid2">
+        <input id="rg-contact" placeholder="Contact">
+        <input id="rg-radius"  placeholder="Delivery Radius (km)" type="number" value="5">
+      </div>
+      <div class="grid2">
+        <input id="rg-open"  placeholder="Opening Hour (0-23)" type="number" value="9">
+        <input id="rg-close" placeholder="Closing Hour (0-23)" type="number" value="22">
+      </div>
+      <button class="btn btn-blue" style="width:100%" onclick="registerRestaurant()">Register</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main portal -->
+<div id="app-section" style="display:none" class="container">
+  <div class="tabs">
+    <div class="tab active" onclick="showSection('menu-section')">📋 Menu</div>
+    <div class="tab" onclick="showSection('orders-section')">📦 Orders</div>
+    <div class="tab" onclick="showSection('add-item-section')">➕ Add Item</div>
+  </div>
+
+  <!-- Menu management -->
+  <div id="menu-section" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h2>Menu Items</h2>
+      <button class="btn btn-sm btn-blue" onclick="loadMenu()">Refresh</button>
+    </div>
+    <div id="menu-msg"></div>
+    <table>
+      <thead><tr><th>Name</th><th>Price</th><th>Description</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="menu-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Add menu item -->
+  <div id="add-item-section" class="panel" style="display:none">
+    <h2>Add Menu Item</h2>
+    <div id="add-item-msg"></div>
+    <div class="grid2">
+      <input id="ai-name"  placeholder="Item Name *">
+      <input id="ai-price" placeholder="Price *" type="number" step="0.01">
+    </div>
+    <input id="ai-desc" placeholder="Description">
+    <div class="grid2">
+      <input id="ai-stock" placeholder="Stock Quantity" type="number" value="10">
+      <select id="ai-avail">
+        <option value="true">Available</option>
+        <option value="false">Unavailable</option>
+      </select>
+    </div>
+    <button class="btn btn-green" onclick="addMenuItem()">Add Item</button>
+  </div>
+
+  <!-- Orders -->
+  <div id="orders-section" class="panel" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h2>Orders</h2>
+      <button class="btn btn-sm btn-blue" onclick="loadOrders()">Refresh</button>
+    </div>
+    <div id="orders-msg"></div>
+    <table>
+      <thead><tr><th>Order ID</th><th>Total</th><th>Payment</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody id="orders-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000/api';
+let currentRestaurant = null;
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init() {
+  await loadRestaurantList();
+  const saved = localStorage.getItem('fd_restaurant');
+  if (saved) {
+    currentRestaurant = JSON.parse(saved);
+    showApp();
+  }
+}
+
+async function loadRestaurantList() {
+  try {
+    const res  = await fetch(`${API}/restaurants/all`);
+    const list = await res.json();
+    const sel  = document.getElementById('restaurant-select');
+    if (!list.length) { sel.innerHTML = '<option value="">No restaurants registered yet</option>'; return; }
+    sel.innerHTML = '<option value="">-- Select --</option>' +
+      list.map(r => `<option value='${JSON.stringify(r).replace(/'/g,"&#39;")}'>${escHtml(r.name)}</option>`).join('');
+  } catch(e) { /* server may not be up yet */ }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('#auth-section .tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('login-form').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('auth-msg').innerHTML = '';
+}
+
+function selectRestaurant() {
+  const sel = document.getElementById('restaurant-select');
+  if (!sel.value) return showAuthMsg('Please select a restaurant.', true);
+  try {
+    currentRestaurant = JSON.parse(sel.value);
+    localStorage.setItem('fd_restaurant', JSON.stringify(currentRestaurant));
+    showApp();
+  } catch(e) { showAuthMsg('Invalid selection.', true); }
+}
+
+async function registerRestaurant() {
+  const name    = document.getElementById('rg-name').value.trim();
+  const cuisine = document.getElementById('rg-cuisine').value.trim();
+  const address = document.getElementById('rg-address').value.trim();
+  const contact = document.getElementById('rg-contact').value.trim();
+  const radius  = document.getElementById('rg-radius').value.trim();
+  const open    = document.getElementById('rg-open').value.trim();
+  const close   = document.getElementById('rg-close').value.trim();
+  if (!name || !cuisine || !address) return showAuthMsg('Name, cuisine, and address are required.', true);
+  try {
+    const res  = await fetch(`${API}/restaurant/register`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, cuisineType: cuisine, address, contact,
+        openingHour: open, closingHour: close, deliveryRadiusKm: radius})
+    });
+    const data = await res.json();
+    if (!res.ok) return showAuthMsg(data.error || 'Registration failed.', true);
+    currentRestaurant = data;
+    localStorage.setItem('fd_restaurant', JSON.stringify(currentRestaurant));
+    showApp();
+  } catch(e) { showAuthMsg('Cannot connect to server.', true); }
+}
+
+function showAuthMsg(msg, isErr) {
+  document.getElementById('auth-msg').innerHTML =
+    `<div class="msg ${isErr ? 'msg-err' : 'msg-ok'}">${msg}</div>`;
+}
+
+function showApp() {
+  document.getElementById('auth-section').style.display = 'none';
+  document.getElementById('app-section').style.display  = '';
+  document.getElementById('header-name').textContent = currentRestaurant.name;
+  document.getElementById('logout-btn').style.display = '';
+  loadMenu();
+  loadOrders();
+}
+
+function logout() {
+  localStorage.removeItem('fd_restaurant');
+  currentRestaurant = null;
+  location.reload();
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function showSection(id) {
+  ['menu-section','orders-section','add-item-section'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? '' : 'none';
+  });
+  document.querySelectorAll('#app-section > .tabs .tab').forEach((t, i) => {
+    t.classList.toggle('active', ['menu-section','orders-section','add-item-section'][i] === id);
+  });
+  if (id === 'orders-section') loadOrders();
+  if (id === 'menu-section')   loadMenu();
+}
+
+// ── Menu ──────────────────────────────────────────────────────────────────
+async function loadMenu() {
+  if (!currentRestaurant) return;
+  try {
+    const res   = await fetch(`${API}/restaurant/${currentRestaurant.id}/menu`);
+    const items = await res.json();
+    const tbody = document.getElementById('menu-tbody');
+    if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="color:#999;text-align:center">No menu items yet.</td></tr>'; return; }
+    tbody.innerHTML = items.map(item => `
+      <tr>
+        <td><strong>${escHtml(item.name)}</strong></td>
+        <td>Rs ${item.price.toFixed(2)}</td>
+        <td style="color:#666;font-size:.85rem">${escHtml(item.description)}</td>
+        <td>${item.stockQuantity}</td>
+        <td><span class="tag ${item.available ? 'tag-green' : 'tag-red'}">${item.available ? 'Available' : 'Unavailable'}</span></td>
+        <td>
+          <button class="btn btn-sm ${item.available ? 'btn-red' : 'btn-green'}"
+            onclick="toggleAvailability('${item.id}', ${!item.available})">
+            ${item.available ? 'Disable' : 'Enable'}
+          </button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { showMsg('menu-msg', 'Error loading menu.', true); }
+}
+
+async function toggleAvailability(itemId, newVal) {
+  try {
+    const res = await fetch(`${API}/restaurant/${currentRestaurant.id}/menu/${itemId}/availability`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({available: newVal})
+    });
+    if (!res.ok) { const d = await res.json(); return showMsg('menu-msg', d.error, true); }
+    showMsg('menu-msg', 'Availability updated.', false);
+    loadMenu();
+  } catch(e) { showMsg('menu-msg', 'Error updating availability.', true); }
+}
+
+// ── Add Item ──────────────────────────────────────────────────────────────
+async function addMenuItem() {
+  const name  = document.getElementById('ai-name').value.trim();
+  const price = document.getElementById('ai-price').value.trim();
+  const desc  = document.getElementById('ai-desc').value.trim();
+  const stock = document.getElementById('ai-stock').value.trim();
+  const avail = document.getElementById('ai-avail').value;
+  if (!name || !price) return showMsg('add-item-msg', 'Name and price are required.', true);
+  try {
+    const res  = await fetch(`${API}/restaurant/${currentRestaurant.id}/menu/add`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, price, description: desc, stockQuantity: stock, available: avail})
+    });
+    const data = await res.json();
+    if (!res.ok) return showMsg('add-item-msg', data.error || 'Failed to add item.', true);
+    showMsg('add-item-msg', `"${data.name}" added successfully!`, false);
+    ['ai-name','ai-price','ai-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('ai-stock').value = '10';
+  } catch(e) { showMsg('add-item-msg', 'Error adding item.', true); }
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  if (!currentRestaurant) return;
+  try {
+    const res    = await fetch(`${API}/restaurant/${currentRestaurant.id}/orders`);
+    const orders = await res.json();
+    const tbody  = document.getElementById('orders-tbody');
+    if (!orders.length) { tbody.innerHTML = '<tr><td colspan="6" style="color:#999;text-align:center">No orders yet.</td></tr>'; return; }
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td style="font-size:.8rem;font-family:monospace">${o.id.substring(0,12)}…</td>
+        <td>Rs ${o.total.toFixed(2)}</td>
+        <td><span class="tag tag-blue">${o.paymentMethod}</span></td>
+        <td><span class="tag ${statusTag(o.status)}">${o.status}</span></td>
+        <td style="font-size:.8rem;color:#666">${o.createdAt ? o.createdAt.substring(0,16).replace('T',' ') : ''}</td>
+        <td>${orderActions(o)}</td>
+      </tr>`).join('');
+  } catch(e) { showMsg('orders-msg', 'Error loading orders.', true); }
+}
+
+function orderActions(o) {
+  if (o.status === 'PLACED')    return `<button class="btn btn-sm btn-orange" onclick="advanceOrder('${o.id}')">Accept →</button>`;
+  if (o.status === 'PREPARING') return `<button class="btn btn-sm btn-green"  onclick="advanceOrder('${o.id}')">Mark Ready →</button>`;
+  if (o.status === 'READY')     return `<button class="btn btn-sm btn-blue"   onclick="assignRider('${o.id}')">Assign Rider →</button>`;
+  return `<span style="color:#999;font-size:.85rem">Delivered ✓</span>`;
+}
+
+async function advanceOrder(orderId) {
+  try {
+    const res  = await fetch(`${API}/order/${orderId}/advance`, {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+    const data = await res.json();
+    if (!res.ok) return showMsg('orders-msg', data.error, true);
+    showMsg('orders-msg', `Order status → ${data.status}`, false);
+    loadOrders();
+  } catch(e) { showMsg('orders-msg', 'Error updating order.', true); }
+}
+
+async function assignRider(orderId) {
+  const riders = ['Alice','Bob','Charlie','Diana','Eve'];
+  const rider  = prompt('Select rider:\n' + riders.map((r,i) => `${i+1}. ${r}`).join('\n') + '\n\nEnter name:');
+  if (!rider) return;
+  try {
+    const res  = await fetch(`${API}/order/${orderId}/assign-rider`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({rider})
+    });
+    const data = await res.json();
+    if (!res.ok) return showMsg('orders-msg', data.error, true);
+    showMsg('orders-msg', `Rider ${rider} assigned. Status → ${data.status}`, false);
+    loadOrders();
+  } catch(e) { showMsg('orders-msg', 'Error assigning rider.', true); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function statusTag(s) {
+  if (s === 'DELIVERED') return 'tag-green';
+  if (s === 'PLACED')    return 'tag-red';
+  if (s === 'PREPARING') return 'tag-yellow';
+  if (s === 'READY')     return 'tag-blue';
+  return '';
+}
+
+function showMsg(elId, msg, isErr) {
+  const el = document.getElementById(elId);
+  el.innerHTML = `<div class="msg ${isErr ? 'msg-err' : 'msg-ok'}">${msg}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 4000);
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+</body>
+</html>
