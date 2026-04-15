@@ -134,6 +134,17 @@ public class RestaurantRepositoryDB {
         return restaurants;
     }
 
+    public void deleteById(String id) {
+        String sql = "DELETE FROM restaurants WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete restaurant", e);
+        }
+    }
+
     public void update(Restaurant restaurant) {
         save(restaurant);
     }

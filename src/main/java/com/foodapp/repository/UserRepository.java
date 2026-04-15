@@ -30,7 +30,18 @@ public class UserRepository {
                 .findFirst();
     }
 
+    public Optional<User> findById(String id) {
+        return users.stream()
+                .filter(u -> u.getId().equals(id))
+                .findFirst();
+    }
+
     public List<User> findAll() {
         return new ArrayList<>(users);
+    }
+
+    public void deleteById(String id) {
+        users.removeIf(u -> u.getId().equals(id));
+        dataStorage.save(users, FILE_PATH);
     }
 }

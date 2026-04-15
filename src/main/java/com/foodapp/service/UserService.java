@@ -39,14 +39,16 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public void deleteUser(String userId) {
+        userRepository.deleteById(userId);
+    }
+
     private String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
             StringBuilder hex = new StringBuilder();
-            for (byte b : hash) {
-                hex.append(String.format("%02x", b));
-            }
+            for (byte b : hash) { hex.append(String.format("%02x", b)); }
             return hex.toString();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 not available", e);

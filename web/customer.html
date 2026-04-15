@@ -9,8 +9,7 @@
   body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#222}
   header{background:#e63946;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
   header h1{font-size:1.3rem}
-  #user-info{font-size:.9rem}
-  .container{max-width:960px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:1fr 320px;gap:20px}
+  .container{max-width:980px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:1fr 320px;gap:20px}
   @media(max-width:700px){.container{grid-template-columns:1fr}}
   .panel{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:20px}
   h2{font-size:1.1rem;margin-bottom:14px;color:#e63946}
@@ -20,23 +19,36 @@
   .btn-red{background:#e63946;color:#fff}
   .btn-blue{background:#457b9d;color:#fff}
   .btn-green{background:#2a9d8f;color:#fff}
+  .btn-orange{background:#f4a261;color:#fff}
   .btn-sm{padding:5px 12px;font-size:.82rem}
-  .restaurant-card{border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;cursor:pointer;transition:border-color .2s}
-  .restaurant-card:hover{border-color:#e63946}
+
+  /* Restaurant cards with images */
+  .restaurant-card{border:1px solid #eee;border-radius:10px;margin-bottom:12px;cursor:pointer;overflow:hidden;transition:box-shadow .2s}
+  .restaurant-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12)}
+  .restaurant-card img{width:100%;height:140px;object-fit:cover;display:block}
+  .restaurant-card .card-body{padding:12px}
   .restaurant-card h3{font-size:1rem;margin-bottom:4px}
   .restaurant-card .meta{font-size:.82rem;color:#666}
-  .menu-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0}
+
+  /* Menu items with images */
+  .menu-item{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0}
   .menu-item:last-child{border-bottom:none}
-  .menu-item .info h4{font-size:.95rem}
+  .menu-item img{width:72px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0}
+  .menu-item .info{flex:1}
+  .menu-item .info h4{font-size:.95rem;margin-bottom:2px}
   .menu-item .info p{font-size:.82rem;color:#666}
-  .menu-item .price{font-weight:700;color:#e63946;white-space:nowrap;margin-right:10px}
+  .menu-item .actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .menu-item .price{font-weight:700;color:#e63946;white-space:nowrap}
   .unavailable{opacity:.45}
+
   .cart-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:.9rem}
   .cart-item:last-child{border-bottom:none}
-  .cart-total{margin-top:12px;font-weight:700;font-size:1rem;text-align:right}
+  .cart-total{margin-top:12px;font-size:.95rem;line-height:1.8}
   .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.75rem;font-weight:600}
   .tag-green{background:#d4edda;color:#155724}
   .tag-red{background:#f8d7da;color:#721c24}
+  .tag-yellow{background:#fff3cd;color:#856404}
+
   #auth-section{max-width:400px;margin:40px auto;padding:0 16px}
   .tabs{display:flex;margin-bottom:16px;border-bottom:2px solid #eee}
   .tab{padding:8px 20px;cursor:pointer;font-weight:600;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px}
@@ -45,20 +57,30 @@
   .msg-err{background:#f8d7da;color:#721c24}
   .msg-ok{background:#d4edda;color:#155724}
   #back-btn{background:none;border:none;color:#fff;cursor:pointer;font-size:.9rem;text-decoration:underline}
-  .qty-input{width:60px;margin:0 6px}
+  .qty-input{width:56px;margin:0;padding:5px 8px}
   #order-confirm{background:#d4edda;color:#155724;padding:12px;border-radius:8px;margin-top:10px;display:none}
+
+  /* Coupon box */
+  .coupon-box{display:flex;gap:8px;margin-bottom:10px}
+  .coupon-box input{margin:0;flex:1}
+  #coupon-status{font-size:.85rem;margin-bottom:8px;min-height:20px}
+  .coupon-applied{color:#155724;font-weight:600}
+  .coupon-error{color:#721c24}
+
+  hr.divider{margin:16px 0;border:none;border-top:1px solid #eee}
 </style>
 </head>
 <body>
 <header>
-  <h1>🛒 Customer Portal</h1>
-  <div id="user-info">
-    <span id="welcome-msg"></span>
+  <h1>🍔 Food Delivery</h1>
+  <div style="display:flex;align-items:center;gap:16px">
+    <span id="welcome-msg" style="font-size:.9rem"></span>
     <button id="back-btn" onclick="logout()" style="display:none">Logout</button>
+    <a href="index.html" style="color:#fff;font-size:.85rem">Home</a>
   </div>
 </header>
 
-<!-- Auth section (shown when not logged in) -->
+<!-- Auth -->
 <div id="auth-section">
   <div class="panel">
     <div class="tabs">
@@ -66,13 +88,11 @@
       <div class="tab" onclick="switchTab('register')">Register</div>
     </div>
     <div id="auth-msg"></div>
-
     <div id="login-form">
       <input id="l-username" placeholder="Username">
       <input id="l-password" type="password" placeholder="Password">
       <button class="btn btn-red" style="width:100%" onclick="doLogin()">Login</button>
     </div>
-
     <div id="register-form" style="display:none">
       <input id="r-username" placeholder="Username">
       <input id="r-password" type="password" placeholder="Password">
@@ -83,14 +103,13 @@
   </div>
 </div>
 
-<!-- Main app (shown when logged in) -->
+<!-- Main app -->
 <div id="app-section" style="display:none">
   <div class="container">
-    <!-- Left column -->
+    <!-- Left -->
     <div>
-      <!-- Search / Browse -->
       <div class="panel" id="browse-panel">
-        <h2>Find Restaurants</h2>
+        <h2>🔍 Find Restaurants</h2>
         <div style="display:flex;gap:8px">
           <input id="area-input" placeholder="Enter your delivery area…" style="margin:0">
           <button class="btn btn-red" onclick="searchRestaurants()">Search</button>
@@ -98,7 +117,6 @@
         <div id="restaurant-list" style="margin-top:14px"></div>
       </div>
 
-      <!-- Menu -->
       <div class="panel" id="menu-panel" style="display:none;margin-top:20px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
           <h2 id="menu-title">Menu</h2>
@@ -108,23 +126,34 @@
       </div>
     </div>
 
-    <!-- Right column: cart -->
+    <!-- Right: cart -->
     <div>
       <div class="panel" style="position:sticky;top:20px">
         <h2>🛒 Cart</h2>
         <div id="cart-items"><p style="color:#999;font-size:.9rem">Your cart is empty.</p></div>
         <div class="cart-total" id="cart-total"></div>
 
-        <div style="margin-top:14px">
-          <select id="payment-method" style="margin-bottom:10px">
-            <option value="CASH_ON_DELIVERY">Cash on Delivery</option>
-            <option value="CARD">Card Payment</option>
-          </select>
-          <button class="btn btn-green" style="width:100%" onclick="placeOrder()">Place Order</button>
+        <!-- Coupon section -->
+        <hr class="divider">
+        <h2>🎟️ Coupon</h2>
+        <div class="coupon-box">
+          <input id="coupon-input" placeholder="Enter code (SAVE10 / SAVE20)" style="margin:0">
+          <button class="btn btn-orange btn-sm" onclick="applyCoupon()">Apply</button>
         </div>
+        <div id="coupon-status"></div>
+        <button id="remove-coupon-btn" class="btn btn-sm" style="background:#eee;display:none;margin-bottom:10px" onclick="removeCoupon()">Remove Coupon</button>
+
+        <!-- Payment & order -->
+        <hr class="divider">
+        <select id="payment-method" style="margin-bottom:10px">
+          <option value="CASH_ON_DELIVERY">Cash on Delivery</option>
+          <option value="CARD">Card Payment</option>
+        </select>
+        <button class="btn btn-green" style="width:100%" onclick="placeOrder()">Place Order</button>
         <div id="order-confirm"></div>
 
-        <hr style="margin:16px 0;border:none;border-top:1px solid #eee">
+        <!-- Order history -->
+        <hr class="divider">
         <h2>📦 My Orders</h2>
         <button class="btn btn-sm btn-blue" onclick="loadMyOrders()" style="margin-bottom:10px">Refresh</button>
         <div id="my-orders"></div>
@@ -137,15 +166,14 @@
 const API = 'http://localhost:8000/api';
 let currentUser = JSON.parse(localStorage.getItem('fd_user') || 'null');
 let cart = JSON.parse(localStorage.getItem('fd_cart') || '[]');
+let activeCoupon = JSON.parse(localStorage.getItem('fd_coupon') || 'null'); // {code, discountPercent}
 let currentRestaurantId = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────────
-function init() {
-  if (currentUser) showApp();
-}
+function init() { if (currentUser) showApp(); }
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#auth-section .tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('login-form').style.display    = tab === 'login'    ? '' : 'none';
   document.getElementById('register-form').style.display = tab === 'register' ? '' : 'none';
@@ -157,10 +185,7 @@ async function doLogin() {
   const password = document.getElementById('l-password').value.trim();
   if (!username || !password) return showAuthMsg('Please fill in all fields.', true);
   try {
-    const res = await fetch(`${API}/users/login`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username, password})
-    });
+    const res = await fetch(`${API}/users/login`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
     const data = await res.json();
     if (!res.ok) return showAuthMsg(data.error || 'Login failed.', true);
     currentUser = data;
@@ -176,10 +201,7 @@ async function doRegister() {
   const address  = document.getElementById('r-address').value.trim();
   if (!username || !password) return showAuthMsg('Username and password are required.', true);
   try {
-    const res = await fetch(`${API}/users/register`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username, password, fullName, address})
-    });
+    const res = await fetch(`${API}/users/register`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,fullName,address})});
     const data = await res.json();
     if (!res.ok) return showAuthMsg(data.error || 'Registration failed.', true);
     currentUser = data;
@@ -189,8 +211,7 @@ async function doRegister() {
 }
 
 function showAuthMsg(msg, isErr) {
-  const el = document.getElementById('auth-msg');
-  el.innerHTML = `<div class="msg ${isErr ? 'msg-err' : 'msg-ok'}">${msg}</div>`;
+  document.getElementById('auth-msg').innerHTML = `<div class="msg ${isErr?'msg-err':'msg-ok'}">${msg}</div>`;
 }
 
 function showApp() {
@@ -200,13 +221,14 @@ function showApp() {
   document.getElementById('back-btn').style.display = '';
   if (currentUser.address) document.getElementById('area-input').value = currentUser.address;
   renderCart();
+  renderCouponStatus();
   loadMyOrders();
 }
 
 function logout() {
   localStorage.removeItem('fd_user');
   localStorage.removeItem('fd_cart');
-  currentUser = null; cart = [];
+  localStorage.removeItem('fd_coupon');
   location.reload();
 }
 
@@ -219,16 +241,22 @@ async function searchRestaurants() {
     const list = await res.json();
     const el   = document.getElementById('restaurant-list');
     if (!list.length) { el.innerHTML = '<p style="color:#999">No restaurants found in this area.</p>'; return; }
-    el.innerHTML = list.map(r => `
+    el.innerHTML = list.map(r => {
+      const img = r.imageUrl || `https://picsum.photos/seed/${Math.abs(hashCode(r.name))%1000}/400/200`;
+      return `
       <div class="restaurant-card" onclick="loadMenu('${r.id}','${escHtml(r.name)}')">
-        <h3>${escHtml(r.name)}</h3>
-        <div class="meta">
-          ${escHtml(r.cuisineType)} &nbsp;·&nbsp;
-          ⭐ ${r.averageRating.toFixed(1)} &nbsp;·&nbsp;
-          🕐 ${r.estimatedDeliveryMinutes} min &nbsp;·&nbsp;
-          📍 ${escHtml(r.address)}
+        <img src="${img}" alt="${escHtml(r.name)}" loading="lazy" onerror="this.src='https://picsum.photos/400/200'">
+        <div class="card-body">
+          <h3>${escHtml(r.name)}</h3>
+          <div class="meta">
+            🍽️ ${escHtml(r.cuisineType)} &nbsp;·&nbsp;
+            ⭐ ${r.averageRating.toFixed(1)} &nbsp;·&nbsp;
+            🕐 ${r.estimatedDeliveryMinutes} min &nbsp;·&nbsp;
+            📍 ${escHtml(r.address)}
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   } catch(e) { document.getElementById('restaurant-list').innerHTML = '<p style="color:red">Error loading restaurants.</p>'; }
 }
 
@@ -242,22 +270,24 @@ async function loadMenu(restaurantId, name) {
     const items = await res.json();
     const el    = document.getElementById('menu-list');
     if (!items.length) { el.innerHTML = '<p style="color:#999">No items on this menu.</p>'; return; }
-    el.innerHTML = items.map(item => `
+    el.innerHTML = items.map(item => {
+      const img = item.imageUrl || `https://picsum.photos/seed/${Math.abs(hashCode(item.name))%1000+100}/200/150`;
+      return `
       <div class="menu-item ${item.available ? '' : 'unavailable'}">
+        <img src="${img}" alt="${escHtml(item.name)}" loading="lazy" onerror="this.src='https://picsum.photos/200/150'">
         <div class="info">
-          <h4>${escHtml(item.name)}
-            <span class="tag ${item.available ? 'tag-green' : 'tag-red'}">${item.available ? 'Available' : 'Unavailable'}</span>
-          </h4>
+          <h4>${escHtml(item.name)} <span class="tag ${item.available?'tag-green':'tag-red'}">${item.available?'Available':'Unavailable'}</span></h4>
           <p>${escHtml(item.description)}</p>
-        </div>
-        <div style="display:flex;align-items:center">
           <span class="price">Rs ${item.price.toFixed(2)}</span>
+        </div>
+        <div class="actions">
           ${item.available ? `
             <input type="number" class="qty-input" id="qty-${item.id}" value="1" min="1" max="99">
             <button class="btn btn-sm btn-red" onclick="addToCart('${item.id}','${escHtml(item.name)}',${item.price},'${restaurantId}')">Add</button>
           ` : ''}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   } catch(e) { document.getElementById('menu-list').innerHTML = '<p style="color:red">Error loading menu.</p>'; }
 }
 
@@ -270,7 +300,6 @@ function closeMenu() {
 function addToCart(itemId, name, price, restaurantId) {
   const qty = parseInt(document.getElementById('qty-' + itemId).value) || 1;
   if (qty <= 0) return;
-  // Enforce single-restaurant cart
   if (cart.length && cart[0].restaurantId !== restaurantId) {
     if (!confirm('Your cart has items from another restaurant. Clear and start fresh?')) return;
     cart = [];
@@ -290,37 +319,104 @@ function removeFromCart(itemId) {
 
 function renderCart() {
   const el = document.getElementById('cart-items');
-  if (!cart.length) { el.innerHTML = '<p style="color:#999;font-size:.9rem">Your cart is empty.</p>'; document.getElementById('cart-total').textContent = ''; return; }
+  if (!cart.length) {
+    el.innerHTML = '<p style="color:#999;font-size:.9rem">Your cart is empty.</p>';
+    document.getElementById('cart-total').innerHTML = '';
+    return;
+  }
   el.innerHTML = cart.map(c => `
     <div class="cart-item">
       <span>${escHtml(c.name)} × ${c.quantity}</span>
-      <span>
-        Rs ${(c.price * c.quantity).toFixed(2)}
+      <span>Rs ${(c.price * c.quantity).toFixed(2)}
         <button class="btn btn-sm" style="background:#eee;margin-left:6px" onclick="removeFromCart('${c.itemId}')">✕</button>
       </span>
     </div>`).join('');
+
   const subtotal = cart.reduce((s, c) => s + c.price * c.quantity, 0);
-  document.getElementById('cart-total').innerHTML =
-    `Subtotal: Rs ${subtotal.toFixed(2)}<br>Delivery: Rs 50.00<br><strong>Total: Rs ${(subtotal + 50).toFixed(2)}</strong>`;
+  const discount = activeCoupon ? subtotal * activeCoupon.discountPercent / 100 : 0;
+  const total    = subtotal + 50 - discount;
+
+  let html = `Subtotal: Rs ${subtotal.toFixed(2)}<br>Delivery: Rs 50.00`;
+  if (activeCoupon) html += `<br><span style="color:#2a9d8f">Coupon (${activeCoupon.code}): -Rs ${discount.toFixed(2)}</span>`;
+  html += `<br><strong>Total: Rs ${total.toFixed(2)}</strong>`;
+  document.getElementById('cart-total').innerHTML = html;
+}
+
+// ── Coupon ────────────────────────────────────────────────────────────────
+async function applyCoupon() {
+  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+  if (!code) return;
+
+  // Try API first, fall back to hardcoded
+  let coupon = null;
+  try {
+    const res = await fetch(`${API}/coupons/validate`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({code})
+    });
+    if (res.ok) coupon = await res.json();
+  } catch(e) {}
+
+  // Hardcoded fallback (works even without API endpoint)
+  if (!coupon) {
+    const hardcoded = {SAVE10: 10, SAVE20: 20};
+    if (hardcoded[code]) coupon = {code, discountPercent: hardcoded[code], active: true};
+  }
+
+  if (!coupon || !coupon.active) {
+    document.getElementById('coupon-status').innerHTML = '<span class="coupon-error">❌ Invalid or expired coupon code.</span>';
+    return;
+  }
+
+  activeCoupon = {code: coupon.code, discountPercent: coupon.discountPercent};
+  localStorage.setItem('fd_coupon', JSON.stringify(activeCoupon));
+  renderCouponStatus();
+  renderCart();
+}
+
+function removeCoupon() {
+  activeCoupon = null;
+  localStorage.removeItem('fd_coupon');
+  document.getElementById('coupon-input').value = '';
+  renderCouponStatus();
+  renderCart();
+}
+
+function renderCouponStatus() {
+  const statusEl = document.getElementById('coupon-status');
+  const removeBtn = document.getElementById('remove-coupon-btn');
+  if (activeCoupon) {
+    statusEl.innerHTML = `<span class="coupon-applied">✅ ${activeCoupon.code} applied — ${activeCoupon.discountPercent}% off!</span>`;
+    removeBtn.style.display = '';
+  } else {
+    statusEl.innerHTML = '<span style="color:#999;font-size:.82rem">Available: SAVE10 (10% off), SAVE20 (20% off)</span>';
+    removeBtn.style.display = 'none';
+  }
 }
 
 // ── Place Order ───────────────────────────────────────────────────────────
 async function placeOrder() {
   if (!cart.length) return alert('Your cart is empty.');
   if (!currentUser)  return alert('Please log in first.');
-  const restaurantId    = cart[0].restaurantId;
-  const paymentMethod   = document.getElementById('payment-method').value;
+  const restaurantId  = cart[0].restaurantId;
+  const paymentMethod = document.getElementById('payment-method').value;
   const items = cart.map(c => ({itemId: c.itemId, quantity: c.quantity}));
+  const body  = {customerId: currentUser.id, restaurantId, paymentMethod, items};
+  if (activeCoupon) body.couponCode = activeCoupon.code;
+
   try {
-    const res  = await fetch(`${API}/orders`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({customerId: currentUser.id, restaurantId, paymentMethod, items})
-    });
+    const res  = await fetch(`${API}/orders`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data = await res.json();
     if (!res.ok) return alert(data.error || 'Failed to place order.');
-    cart = [];
+    const ids = JSON.parse(localStorage.getItem('fd_order_ids') || '[]');
+    ids.unshift(data.id);
+    localStorage.setItem('fd_order_ids', JSON.stringify(ids.slice(0, 50)));
+    cart = []; activeCoupon = null;
     localStorage.setItem('fd_cart', JSON.stringify(cart));
+    localStorage.removeItem('fd_coupon');
     renderCart();
+    renderCouponStatus();
+    document.getElementById('coupon-input').value = '';
     const conf = document.getElementById('order-confirm');
     conf.style.display = '';
     conf.innerHTML = `✅ Order placed! ID: <strong>${data.id}</strong><br>Total: Rs ${data.total.toFixed(2)} | Status: ${data.status}`;
@@ -332,61 +428,34 @@ async function placeOrder() {
 async function loadMyOrders() {
   if (!currentUser) return;
   const el = document.getElementById('my-orders');
-  // We poll each known order id — simpler: fetch all via restaurant isn't available for customer,
-  // so we store order IDs in localStorage and poll status for each.
   const orderIds = JSON.parse(localStorage.getItem('fd_order_ids') || '[]');
   if (!orderIds.length) { el.innerHTML = '<p style="color:#999;font-size:.85rem">No orders yet.</p>'; return; }
   const rows = await Promise.all(orderIds.map(async id => {
     try {
       const res  = await fetch(`${API}/order/${id}/status`);
       const data = await res.json();
-      return `<div style="font-size:.85rem;padding:5px 0;border-bottom:1px solid #f0f0f0">
-        <strong>${id.substring(0,8)}…</strong><br>
-        Status: <span class="tag ${statusTag(data.status)}">${data.status}</span>
-        Payment: ${data.paymentStatus}
+      return `<div style="font-size:.85rem;padding:6px 0;border-bottom:1px solid #f0f0f0">
+        <strong>${id.substring(0,8)}…</strong>
+        <span class="tag ${statusTag(data.status)}" style="margin-left:6px">${data.status}</span>
+        <span style="color:#666;margin-left:6px">${data.paymentStatus}</span>
       </div>`;
     } catch { return ''; }
   }));
-  el.innerHTML = rows.join('') || '<p style="color:#999;font-size:.85rem">No orders yet.</p>';
+  el.innerHTML = rows.filter(Boolean).join('') || '<p style="color:#999;font-size:.85rem">No orders yet.</p>';
 }
 
-// Patch placeOrder to also save order id
-const _origPlace = placeOrder;
-// Override after definition to capture order id
-document.addEventListener('DOMContentLoaded', () => {});
-
-// We override placeOrder inline above — store order id after success
-async function placeOrder() {
-  if (!cart.length) return alert('Your cart is empty.');
-  if (!currentUser)  return alert('Please log in first.');
-  const restaurantId  = cart[0].restaurantId;
-  const paymentMethod = document.getElementById('payment-method').value;
-  const items = cart.map(c => ({itemId: c.itemId, quantity: c.quantity}));
-  try {
-    const res  = await fetch(`${API}/orders`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({customerId: currentUser.id, restaurantId, paymentMethod, items})
-    });
-    const data = await res.json();
-    if (!res.ok) return alert(data.error || 'Failed to place order.');
-    // Save order id
-    const ids = JSON.parse(localStorage.getItem('fd_order_ids') || '[]');
-    ids.unshift(data.id);
-    localStorage.setItem('fd_order_ids', JSON.stringify(ids.slice(0, 50)));
-    cart = [];
-    localStorage.setItem('fd_cart', JSON.stringify(cart));
-    renderCart();
-    const conf = document.getElementById('order-confirm');
-    conf.style.display = '';
-    conf.innerHTML = `✅ Order placed! ID: <strong>${data.id}</strong><br>Total: Rs ${data.total.toFixed(2)} | Status: ${data.status}`;
-    loadMyOrders();
-  } catch(e) { alert('Error placing order.'); }
-}
-
+// ── Helpers ───────────────────────────────────────────────────────────────
 function statusTag(s) {
   if (s === 'DELIVERED') return 'tag-green';
   if (s === 'PLACED')    return 'tag-red';
+  if (s === 'PREPARING') return 'tag-yellow';
   return '';
+}
+
+function hashCode(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  return h;
 }
 
 function escHtml(s) {

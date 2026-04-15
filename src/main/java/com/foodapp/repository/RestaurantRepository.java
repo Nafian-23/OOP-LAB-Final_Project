@@ -39,4 +39,9 @@ public class RestaurantRepository {
         restaurants.add(restaurant);
         dataStorage.save(restaurants, FILE_PATH);
     }
+
+    public void deleteById(String id) {
+        restaurants.removeIf(r -> r.getId().equals(id));
+        dataStorage.save(restaurants, FILE_PATH);
+    }
 }

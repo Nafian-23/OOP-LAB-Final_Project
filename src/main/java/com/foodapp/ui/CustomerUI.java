@@ -13,6 +13,7 @@ public class CustomerUI {
     private final OrderService orderService;
     private final SearchService searchService;
     private final CouponService couponService;
+    private final PaymentService paymentService;
 
     private final Scanner scanner;
     private User currentUser;
@@ -21,7 +22,7 @@ public class CustomerUI {
 
     public CustomerUI(UserService userService, RestaurantService restaurantService,
                       OrderService orderService, SearchService searchService,
-                      CouponService couponService) {
+                      CouponService couponService, PaymentService paymentService) {
         this.userService = userService;
         this.restaurantService = restaurantService;
         this.orderService = orderService;

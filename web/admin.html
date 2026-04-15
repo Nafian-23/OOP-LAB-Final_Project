@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Portal – Food Delivery</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#1a1a2e;color:#eee;min-height:100vh}
+  header{background:#16213e;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #e63946}
+  header h1{font-size:1.3rem;color:#e63946}
+  header .nav{display:flex;gap:8px;align-items:center}
+  .container{max-width:1100px;margin:28px auto;padding:0 16px}
+  .panel{background:#16213e;border-radius:10px;padding:22px;margin-bottom:20px;border:1px solid #0f3460}
+  h2{font-size:1.05rem;margin-bottom:16px;color:#e63946;display:flex;align-items:center;gap:8px}
+  input,select,textarea{width:100%;padding:9px 12px;border:1px solid #0f3460;border-radius:6px;font-size:.9rem;margin-bottom:10px;background:#0f3460;color:#eee}
+  input::placeholder{color:#888}
+  .btn{padding:9px 18px;border:none;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:600;transition:opacity .2s}
+  .btn:hover{opacity:.85}
+  .btn-red{background:#e63946;color:#fff}
+  .btn-blue{background:#457b9d;color:#fff}
+  .btn-green{background:#2a9d8f;color:#fff}
+  .btn-sm{padding:5px 12px;font-size:.82rem}
+  .btn-danger{background:#c0392b;color:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
+
+  /* Login */
+  #login-section{max-width:380px;margin:80px auto;padding:0 16px}
+  #login-section .panel{text-align:center}
+  #login-section h1{font-size:1.8rem;color:#e63946;margin-bottom:8px}
+  #login-section p{color:#888;margin-bottom:24px;font-size:.9rem}
+
+  /* Tabs */
+  .tabs{display:flex;border-bottom:2px solid #0f3460;margin-bottom:20px}
+  .tab{padding:10px 22px;cursor:pointer;font-weight:600;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .2s}
+  .tab.active{color:#e63946;border-bottom-color:#e63946}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+  .stat-card{background:#0f3460;border-radius:8px;padding:16px;text-align:center}
+  .stat-card .num{font-size:2rem;font-weight:700;color:#e63946}
+  .stat-card .label{font-size:.82rem;color:#888;margin-top:4px}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{text-align:left;padding:9px 12px;background:#0f3460;color:#aaa;font-weight:600}
+  td{padding:9px 12px;border-bottom:1px solid #0f3460;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,.03)}
+
+  .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.75rem;font-weight:600}
+  .tag-green{background:#1e4d2b;color:#6fcf97}
+  .tag-red{background:#4d1e1e;color:#eb5757}
+  .tag-blue{background:#1e3a4d;color:#56b4d3}
+  .tag-yellow{background:#4d3d1e;color:#f2c94c}
+
+  .msg{padding:8px 12px;border-radius:6px;margin-bottom:12px;font-size:.9rem}
+  .msg-err{background:#4d1e1e;color:#eb5757}
+  .msg-ok{background:#1e4d2b;color:#6fcf97}
+
+  #admin-name{color:#aaa;font-size:.9rem}
+  #logout-btn{background:none;border:1px solid #e63946;color:#e63946;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.85rem}
+  #logout-btn:hover{background:#e63946;color:#fff}
+
+  .search-bar{display:flex;gap:8px;margin-bottom:14px}
+  .search-bar input{margin:0;flex:1}
+
+  .confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+  .confirm-overlay.show{display:flex}
+  .confirm-box{background:#16213e;border:1px solid #e63946;border-radius:10px;padding:28px;max-width:360px;width:90%;text-align:center}
+  .confirm-box p{margin-bottom:20px;color:#ccc}
+  .confirm-box .actions{display:flex;gap:10px;justify-content:center}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-section">
+  <div class="panel">
+    <h1>🔐 Admin</h1>
+    <p>Food Delivery Admin Portal</p>
+    <div id="login-msg"></div>
+    <input id="admin-user" placeholder="Username (admin)" value="admin">
+    <input id="admin-pass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="btn btn-red" style="width:100%;margin-top:4px" onclick="doAdminLogin()">Login</button>
+    <p style="margin-top:16px;font-size:.8rem;color:#555">Default: admin / admin123</p>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" style="display:none">
+  <header>
+    <h1>⚙️ Admin Dashboard</h1>
+    <div class="nav">
+      <span id="admin-name"></span>
+      <button id="logout-btn" onclick="adminLogout()">Logout</button>
+      <a href="index.html" style="color:#888;font-size:.85rem;margin-left:8px">← Home</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="stat-users">–</div><div class="label">Total Users</div></div>
+      <div class="stat-card"><div class="num" id="stat-restaurants">–</div><div class="label">Restaurants</div></div>
+      <div class="stat-card"><div class="num" id="stat-coupons">2</div><div class="label">Active Coupons</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('users')">👥 Users</div>
+      <div class="tab" onclick="showTab('restaurants')">🍽️ Restaurants</div>
+      <div class="tab" onclick="showTab('add-restaurant')">➕ Add Restaurant</div>
+      <div class="tab" onclick="showTab('coupons')">🎟️ Coupons</div>
+    </div>
+
+    <!-- Users tab -->
+    <div id="tab-users">
+      <div class="panel">
+        <h2>👥 All Users</h2>
+        <div class="search-bar">
+          <input id="user-search" placeholder="Search by username or name…" oninput="filterUsers()">
+          <button class="btn btn-sm btn-blue" onclick="loadUsers()">Refresh</button>
+        </div>
+        <div id="users-msg"></div>
+        <table>
+          <thead><tr><th>Username</th><th>Full Name</th><th>Address</th><th>Role</th><th>Action</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Restaurants tab -->
+    <div id="tab-restaurants" style="display:none">
+      <div class="panel">
+        <h2>🍽️ All Restaurants</h2>
+        <div class="search-bar">
+          <input id="rest-search" placeholder="Search by name or cuisine…" oninput="filterRestaurants()">
+          <button class="btn btn-sm btn-blue" onclick="loadRestaurants()">Refresh</button>
+        </div>
+        <div id="restaurants-msg"></div>
+        <table>
+          <thead><tr><th>Name</th><th>Cuisine</th><th>Address</th><th>Rating</th><th>Delivery</th><th>Action</th></tr></thead>
+          <tbody id="restaurants-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add Restaurant tab -->
+    <div id="tab-add-restaurant" style="display:none">
+      <div class="panel">
+        <h2>➕ Add New Restaurant</h2>
+        <div id="add-rest-msg"></div>
+        <div class="grid2">
+          <input id="ar-name"    placeholder="Restaurant Name *">
+          <input id="ar-cuisine" placeholder="Cuisine Type *">
+        </div>
+        <input id="ar-address" placeholder="Address *">
+        <input id="ar-area"    placeholder="Service Area (e.g. Downtown, Lahore)">
+        <div class="grid2">
+          <input id="ar-contact" placeholder="Contact Number">
+          <input id="ar-radius"  placeholder="Delivery Radius (km)" type="number" value="5">
+        </div>
+        <div class="grid2">
+          <input id="ar-open"  placeholder="Opening Hour (0-23)" type="number" value="9">
+          <input id="ar-close" placeholder="Closing Hour (0-23)"  type="number" value="22">
+        </div>
+        <button class="btn btn-green" onclick="addRestaurant()">Add Restaurant</button>
+      </div>
+    </div>
+
+    <!-- Coupons tab -->
+    <div id="tab-coupons" style="display:none">
+      <div class="panel">
+        <h2>🎟️ Active Coupons</h2>
+        <p style="color:#888;font-size:.88rem;margin-bottom:16px">These coupons work across all restaurants.</p>
+        <table>
+          <thead><tr><th>Code</th><th>Discount</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>SAVE10</strong></td>
+              <td>10% off subtotal</td>
+              <td><span class="tag tag-green">Active</span></td>
+            </tr>
+            <tr>
+              <td><strong>SAVE20</strong></td>
+              <td>20% off subtotal</td>
+              <td><span class="tag tag-green">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top:16px;color:#555;font-size:.82rem">
+          Customers can apply these codes in the cart on the Customer Portal.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm dialog -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirm-msg">Are you sure?</p>
+    <div class="actions">
+      <button class="btn btn-danger" onclick="confirmAction()">Delete</button>
+      <button class="btn" style="background:#333;color:#eee" onclick="closeConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000/api';
+let allUsers = [];
+let allRestaurants = [];
+let pendingAction = null;
+
+// ── Admin Login ───────────────────────────────────────────────────────────
+async function doAdminLogin() {
+  const username = document.getElementById('admin-user').value.trim();
+  const password = document.getElementById('admin-pass').value.trim();
+  if (!password) return showLoginMsg('Enter your password.', true);
+
+  // Try API admin login
+  try {
+    const res  = await fetch(`${API}/admin/login`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({username, password})
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      showDashboard(username);
+      return;
+    }
+  } catch(e) {}
+
+  // Fallback: hardcoded admin check
+  if (username === 'admin' && password === 'admin123') {
+    showDashboard(username);
+    return;
+  }
+
+  showLoginMsg('Invalid credentials.', true);
+}
+
+function showLoginMsg(msg, isErr) {
+  document.getElementById('login-msg').innerHTML =
+    `<div class="msg ${isErr?'msg-err':'msg-ok'}">${msg}</div>`;
+}
+
+function showDashboard(username) {
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('dashboard').style.display = '';
+  document.getElementById('admin-name').textContent = `👤 ${username}`;
+  loadUsers();
+  loadRestaurants();
+}
+
+function adminLogout() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-section').style.display = '';
+  document.getElementById('admin-pass').value = '';
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function showTab(name) {
+  ['users','restaurants','add-restaurant','coupons'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
+  });
+  document.querySelectorAll('.tabs .tab').forEach((t, i) => {
+    t.classList.toggle('active', ['users','restaurants','add-restaurant','coupons'][i] === name);
+  });
+  if (name === 'restaurants') loadRestaurants();
+  if (name === 'users')       loadUsers();
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const res  = await fetch(`${API}/admin/users`);
+    if (!res.ok) { showMsg('users-msg', 'Could not load users (API endpoint may not be ready).', true); return; }
+    allUsers = await res.json();
+    renderUsers(allUsers);
+    document.getElementById('stat-users').textContent = allUsers.length;
+  } catch(e) {
+    showMsg('users-msg', 'Cannot connect to server.', true);
+  }
+}
+
+function renderUsers(list) {
+  const tbody = document.getElementById('users-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center">No users found.</td></tr>'; return; }
+  tbody.innerHTML = list.map(u => `
+    <tr>
+      <td><strong>${escHtml(u.username)}</strong></td>
+      <td>${escHtml(u.fullName)}</td>
+      <td style="color:#888;font-size:.85rem">${escHtml(u.address) || '–'}</td>
+      <td><span class="tag ${roleTag(u.role)}">${u.role}</span></td>
+      <td>
+        ${u.role !== 'ADMIN' ? `<button class="btn btn-sm btn-danger" onclick="askDelete('user','${u.id}','${escHtml(u.username)}')">Delete</button>` : '<span style="color:#555">–</span>'}
+      </td>
+    </tr>`).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('user-search').value.toLowerCase();
+  renderUsers(allUsers.filter(u =>
+    u.username.toLowerCase().includes(q) || (u.fullName || '').toLowerCase().includes(q)
+  ));
+}
+
+// ── Restaurants ───────────────────────────────────────────────────────────
+async function loadRestaurants() {
+  try {
+    const res  = await fetch(`${API}/restaurants/all`);
+    if (!res.ok) { showMsg('restaurants-msg', 'Could not load restaurants.', true); return; }
+    allRestaurants = await res.json();
+    renderRestaurants(allRestaurants);
+    document.getElementById('stat-restaurants').textContent = allRestaurants.length;
+  } catch(e) {
+    showMsg('restaurants-msg', 'Cannot connect to server.', true);
+  }
+}
+
+function renderRestaurants(list) {
+  const tbody = document.getElementById('restaurants-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" style="color:#555;text-align:center">No restaurants found.</td></tr>'; return; }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td><strong>${escHtml(r.name)}</strong></td>
+      <td>${escHtml(r.cuisineType)}</td>
+      <td style="color:#888;font-size:.85rem">${escHtml(r.address)}</td>
+      <td>⭐ ${r.averageRating.toFixed(1)}</td>
+      <td>🕐 ${r.estimatedDeliveryMinutes} min</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="askDelete('restaurant','${r.id}','${escHtml(r.name)}')">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterRestaurants() {
+  const q = document.getElementById('rest-search').value.toLowerCase();
+  renderRestaurants(allRestaurants.filter(r =>
+    r.name.toLowerCase().includes(q) || (r.cuisineType || '').toLowerCase().includes(q)
+  ));
+}
+
+// ── Add Restaurant ────────────────────────────────────────────────────────
+async function addRestaurant() {
+  const name    = document.getElementById('ar-name').value.trim();
+  const cuisine = document.getElementById('ar-cuisine').value.trim();
+  const address = document.getElementById('ar-address').value.trim();
+  const area    = document.getElementById('ar-area').value.trim();
+  const contact = document.getElementById('ar-contact').value.trim();
+  const radius  = document.getElementById('ar-radius').value.trim();
+  const open    = document.getElementById('ar-open').value.trim();
+  const close   = document.getElementById('ar-close').value.trim();
+
+  if (!name || !cuisine || !address) {
+    return showMsg('add-rest-msg', 'Name, cuisine, and address are required.', true);
+  }
+
+  try {
+    const res  = await fetch(`${API}/restaurant/register`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, cuisineType: cuisine, address, area: area || address,
+        contact, deliveryRadiusKm: radius, openingHour: open, closingHour: close})
+    });
+    const data = await res.json();
+    if (!res.ok) return showMsg('add-rest-msg', data.error || 'Failed to add restaurant.', true);
+    showMsg('add-rest-msg', `✅ "${data.name}" added successfully!`, false);
+    ['ar-name','ar-cuisine','ar-address','ar-area','ar-contact'].forEach(id => document.getElementById(id).value = '');
+    loadRestaurants();
+  } catch(e) { showMsg('add-rest-msg', 'Cannot connect to server.', true); }
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────
+function askDelete(type, id, name) {
+  pendingAction = {type, id};
+  document.getElementById('confirm-msg').textContent =
+    `Delete ${type} "${name}"? This cannot be undone.`;
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+
+function closeConfirm() {
+  pendingAction = null;
+  document.getElementById('confirm-overlay').classList.remove('show');
+}
+
+async function confirmAction() {
+  if (!pendingAction) return closeConfirm();
+  const {type, id} = pendingAction;
+  closeConfirm();
+
+  const url = type === 'user'
+    ? `${API}/admin/users/${id}`
+    : `${API}/admin/restaurants/${id}`;
+
+  try {
+    const res = await fetch(url, {method: 'DELETE'});
+    if (!res.ok) {
+      const d = await res.json();
+      alert(d.error || 'Delete failed.');
+      return;
+    }
+    if (type === 'user') { loadUsers(); showMsg('users-msg', 'User deleted.', false); }
+    else { loadRestaurants(); showMsg('restaurants-msg', 'Restaurant deleted.', false); }
+  } catch(e) { alert('Cannot connect to server.'); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function roleTag(role) {
+  if (role === 'ADMIN')      return 'tag-red';
+  if (role === 'RESTAURANT') return 'tag-blue';
+  return 'tag-green';
+}
+
+function showMsg(elId, msg, isErr) {
+  const el = document.getElementById(elId);
+  el.innerHTML = `<div class="msg ${isErr?'msg-err':'msg-ok'}">${msg}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 5000);
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

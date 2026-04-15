@@ -51,6 +51,17 @@ public class UserRepositoryDB {
         return Optional.empty();
     }
 
+    public void deleteById(String id) {
+        String sql = "DELETE FROM users WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete user", e);
+        }
+    }
+
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";

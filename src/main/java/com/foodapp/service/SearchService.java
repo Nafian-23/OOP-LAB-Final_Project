@@ -15,9 +15,7 @@ public class SearchService {
     }
 
     public List<Restaurant> searchRestaurants(String query) {
-        if (query == null || query.isBlank()) {
-            return restaurantRepository.findAll();
-        }
+        if (query == null || query.isBlank()) return restaurantRepository.findAll();
         String lower = query.toLowerCase();
         return restaurantRepository.findAll().stream()
                 .filter(r -> r.getName().toLowerCase().contains(lower)
@@ -28,8 +26,7 @@ public class SearchService {
     public List<MenuItem> searchMenuItems(String query) {
         if (query == null || query.isBlank()) {
             return restaurantRepository.findAll().stream()
-                    .flatMap(r -> r.getMenuItems().stream())
-                    .collect(Collectors.toList());
+                    .flatMap(r -> r.getMenuItems().stream()).collect(Collectors.toList());
         }
         String lower = query.toLowerCase();
         return restaurantRepository.findAll().stream()
@@ -39,8 +36,6 @@ public class SearchService {
     }
 
     public List<MenuItem> filterAvailableItems(List<MenuItem> items) {
-        return items.stream()
-                .filter(MenuItem::isAvailable)
-                .collect(Collectors.toList());
+        return items.stream().filter(MenuItem::isAvailable).collect(Collectors.toList());
     }
 }

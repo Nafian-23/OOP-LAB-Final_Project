@@ -27,4 +27,8 @@ public class CouponService {
     public double apply(Coupon coupon, double subtotal) {
         return subtotal * (1 - coupon.getDiscountPercent() / 100.0);
     }
+
+    public java.util.List<Coupon> getAllCoupons() {
+        return new java.util.ArrayList<>(coupons.values());
+    }
 }
